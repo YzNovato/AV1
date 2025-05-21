@@ -1,0 +1,140 @@
+from abc import ABC, abstractmethod
+from datetime import datetime
+
+
+class Mensagem(ABC):
+    def __init__(self, conteudo: str):
+        self.conteudo = conteudo
+        self.data_envio = datetime.now()
+
+    @abstractmethod
+    def exibir(self):
+        pass
+
+class Texto(Mensagem):
+    def exibir(self):
+        return f"[Texto] {self.conteudo} (Enviado em {self.data_envio})"
+
+class Video(Mensagem):
+    def __init__(self, conteudo: str, arquivo: str, formato: str, duracao: int):
+        super().__init__(conteudo)
+        self.arquivo = arquivo
+        self.formato = formato
+        self.duracao = duracao
+
+    def exibir(self):
+        return f"[Vídeo] {self.conteudo}, Arquivo: {self.arquivo}, Formato: {self.formato}, Duração: {self.duracao}s (Enviado em {self.data_envio})"
+
+class Foto(Mensagem):
+    def __init__(self, conteudo: str, arquivo: str, formato: str):
+        super().__init__(conteudo)
+        self.arquivo = arquivo
+        self.formato = formato
+
+    def exibir(self):
+        return f"[Foto] {self.conteudo}, Arquivo: {self.arquivo}, Formato: {self.formato} (Enviado em {self.data_envio})"
+
+class Arquivo(Mensagem):
+    def __init__(self, conteudo: str, arquivo: str, formato: str):
+        super().__init__(conteudo)
+        self.arquivo = arquivo
+        self.formato = formato
+
+    def exibir(self):
+        return f"[Arquivo] {self.conteudo}, Arquivo: {self.arquivo}, Formato: {self.formato} (Enviado em {self.data_envio})"
+
+
+class Canal(ABC):
+    def __init__(self, destino: str):
+        self.destino = destino
+
+    @abstractmethod
+    def enviar(self, mensagem: Mensagem):
+        pass
+
+class WhatsApp(Canal):
+    def enviar(self, mensagem: Mensagem):
+        print(f"Enviando via WhatsApp para telefone {self.destino}")
+        print(mensagem.exibir())
+
+class Telegram(Canal):
+    def enviar(self, mensagem: Mensagem):
+        tipo_destino = "telefone" if self.destino.isdigit() else "usuário"
+        print(f"Enviando via Telegram para {tipo_destino} {self.destino}")
+        print(mensagem.exibir())
+
+class Facebook(Canal):
+    def enviar(self, mensagem: Mensagem):
+        print(f"Enviando via Facebook para usuário {self.destino}")
+        print(mensagem.exibir())
+
+class Instagram(Canal):
+    def enviar(self, mensagem: Mensagem):
+        print(f"Enviando via Instagram para usuário {self.destino}")
+        print(mensagem.exibir())
+
+
+def selecionar_canal():
+    canais = {
+        "1": WhatsApp,
+        "2": Telegram,
+        "3": Facebook,
+        "4": Instagram
+    }
+    print("Escolha o canal para envio:")
+    print("1 - WhatsApp")
+    print("2 - Telegram")
+    print("3 - Facebook")
+    print("4 - Instagram")
+   
+    escolha = input("Digite o número do canal: ")
+    if escolha not in canais:
+        print("Opção inválida.")
+        return selecionar_canal()
+   
+    destino = input("Digite o destinatário (número de telefone ou usuário): ")
+    return canais[escolha](destino)
+
+def selecionar_tipo_mensagem():
+    tipos = {
+        "1": Texto,
+        "2": Video,
+        "3": Foto,
+        "4": Arquivo
+    }
+    print("Escolha o tipo de mensagem:")
+    print("1 - Texto")
+    print("2 - Vídeo")
+    print("3 - Foto")
+    print("4 - Arquivo")
+   
+    escolha = input("Digite o número do tipo de mensagem: ")
+    if escolha not in tipos:
+        print("Opção inválida.")
+        return selecionar_tipo_mensagem()
+
+    conteudo = input("Digite o conteúdo da mensagem: ")
+
+    if escolha == "1":  # Texto
+        return tipos[escolha](conteudo)
+    elif escolha == "2":  # Vídeo
+        arquivo = input("Digite o nome do arquivo de vídeo: ")
+        formato = input("Digite o formato do vídeo: ")
+        duracao = int(input("Digite a duração do vídeo (em segundos): "))
+        return tipos[escolha](conteudo, arquivo, formato, duracao)
+    elif escolha == "3":  # Foto
+        arquivo = input("Digite o nome do arquivo de foto: ")
+        formato = input("Digite o formato da foto: ")
+        return tipos[escolha](conteudo, arquivo, formato)
+    elif escolha == "4":  # Arquivo
+        arquivo = input("Digite o nome do arquivo: ")
+        formato = input("Digite o formato do arquivo: ")
+        return tipos[escolha](conteudo, arquivo, formato)
+
+if __name__ == "__main__":
+    canal = selecionar_canal()
+    mensagem = selecionar_tipo_mensagem()
+    canal.enviar(mensagem)
+
+
+
